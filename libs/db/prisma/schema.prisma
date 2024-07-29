@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+  previewFeatures = ["views"]
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  username        String @unique
+  password        String
+  gamesChallenger Game[] @relation("challenger")
+  gamesChallenged Game[] @relation("challenged")
+  gamesWon        Game[] @relation("winner")
+}
+
+model Game {
+  id String @id @default(auto()) @map("_id") @db.ObjectId
+
+  started  DateTime?
+  winner   User?     @relation(name: "winner", fields: [winnerId], references: [id])
+  winnerId String?   @db.ObjectId
+
+  userChallenger User @relation(name: "challenger", fields: [userIdChallenger], references: [id])
+  userChallenged User @relation(name: "challenged", fields: [userIdChallenged], references: [id])
+
+  userIdChallenger String @db.ObjectId
+  userIdChallenged String @db.ObjectId
+
+  shipsChallenger Ship[]
+  shipsChallenged Ship[]
+
+  actionsChallenger Action[]
+  actionsChallenged Action[]
+}
+
+type Ship {
+  position   Coordinate
+  horizontal Boolean
+  length     Int
+}
+
+type Action {
+  hit    Boolean
+  target Coordinate
+}
+
+type Coordinate {
+  x Int
+  y Int
+}
