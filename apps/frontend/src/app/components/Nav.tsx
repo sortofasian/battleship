@@ -8,6 +8,7 @@ function Nav({ user }: { user: User }) {
     const [, nav] = useLocation()
 
     function logout() {
+        setUserCtx(undefined)
         // clear the userContext on logout
         nav("/")
     }
