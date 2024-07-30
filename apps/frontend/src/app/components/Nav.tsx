@@ -17,7 +17,7 @@ function Nav({ user }: { user: User }) {
             <div className="flex gap-6">
                 <div className="flex gap-2">
                     <div className="min-w-max my-auto truncate text-gray-600">
-                        {/* Username should go here */}
+                        {user?.name}
                     </div>
                     <img
                         src="profile.png"
