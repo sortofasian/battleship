@@ -14,24 +14,25 @@ export function App() {
         // If user is undefined, show the Login switch. Otherwise, show Nav and the switch with Dashboard
         <UserContext.Provider value={{ user, setUser }}>
             <div className="flex flex-col h-screen">
-                {user === undefined ? (
-                    <Switch>
-                        <Route path="/login" component={Login} />
-                        <Route>
-                            <Redirect to="/login" />
-                        </Route>
-                    </Switch>
-                ) : (
-                    <>
-                        <Nav user={user} />
-                        <Switch>
-                            <Route path="/dashboard" component={Dashboard} />
-                            <Route path="*">
-                                <Redirect to="/dashboard" />
-                            </Route>
-                        </Switch>
-                    </>
-                )}
+                <Nav user={user} />
+                <Switch>
+                    <Route path="/dashboard" component={Dashboard} />
+                    <Route path="/setup/:id">
+                        {({ id }: { id: string }) => <Setup id={id} />}
+                    </Route>
+                    <Route path="*">
+                        <Redirect to="/dashboard" />
+                    </Route>
+                </Switch>
+                {/*
+                the JSX below is what should be shown if no user is logged in
+                <Switch>
+                    <Route path="/login" component={Login} />
+                    <Route>
+                        <Redirect to="/login" />
+                    </Route>
+                </Switch>
+                */}
             </div>
         </UserContext.Provider>
     )
