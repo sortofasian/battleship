@@ -24,6 +24,8 @@ export default function NewGame() {
 
     const search = useDelay(async function (search) {
         // Search API for users, set userList to result
+        const users = await api.get<UserResponseDto[]>(`users/search?username=${search}`)
+        setUsers(users.data);
     })
 
     async function newGame() {
