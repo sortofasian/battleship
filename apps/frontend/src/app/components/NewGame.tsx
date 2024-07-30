@@ -1,4 +1,4 @@
-import { UserResponseDto } from "@hs-intern/api"
+import { GameCreateDto, GameResponseDto, UserResponseDto } from "@hs-intern/api"
 import { useContext, useRef, useState } from "react"
 import { useLocation } from "wouter"
 
@@ -24,15 +24,22 @@ export default function NewGame() {
 
     const search = useDelay(async function (search) {
         // Search API for users, set userList to result
-        const users = await api.get<UserResponseDto[]>(`users/search?username=${search}`)
-        setUsers(users.data);
+        const users = await api.get<UserResponseDto[]>(
+            `users/search?username=${search}`
+        )
+        setUsers(users.data)
     })
 
     async function newGame() {
         if (!selectedUser) return
 
         // Post a GameCreateDto to games/create; it should return a gameResponseDto
-        nav(`/setup/${game.id}`)
+        const game = await api.post<GameResponseDto>(
+            "games/create",
+            new GameCreateDto(selectedUser.id)
+        )
+
+        nav(`/setup/${game.data.id}`)
     }
 
     return (
