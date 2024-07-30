@@ -25,6 +25,19 @@ export class GamesService {
 
     async create(id: string, enemyUserId: string): Promise<Game> {
         // create and retur a new game given the user id and enemy id
+        let game:Game = await this.db.game.create({
+            data: {
+                actionsChallenged: [],
+                actionsChallenger: [],
+                shipsChallenged: [],
+                shipsChallenger: [],
+                started: new Date(),
+                userIdChallenged: id,
+                userIdChallenger: enemyUserId
+            }
+         })
+
+         return game;
     }
 
     // Array of functions that compare an id and return whether they triggered and should be removed
