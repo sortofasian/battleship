@@ -1,6 +1,6 @@
 import { GameState } from "@hs-intern/api"
 import { Injectable } from "@nestjs/common"
-import { Action, Game, Ship } from "@prisma/client"
+import { Action, Game, Ship, User } from "@prisma/client"
 
 import { DbService } from "../db/db.service"
 
@@ -37,11 +37,44 @@ export class GamesService {
         // Convert view back to game object
         // Update a game
         // Filter the listeners by running them with the game id and removing ones that return true
+
+        let game:Game = await this.db.game.findUnique({
+            where:
+                {id}
+
+        })
+
+        if (game.started) {
+            throw new Error("Game Already Started")
+        }
+
+        let user:User = await this.db.user.findUnique({
+            where:
+                {id: userId}
+        })
+
+        let view:UserView = this.gameToUserView(game, userId);
+
+        view.userShips = ships;
+
+        game = this.userViewToGame(view, game)
+
+        this.db.game.update({
+            where: {
+                id: game.id,
+            },
+            data: {
+                ...game
+            }
+        })
+
+        this.setupListeners.filter((x) => x(id));
     }
 
-    async awaitSetup(id: string) {
+    async awaitSetup(waitingId: string) {
         // create a function that compares id to an id passed to the function
         // push the function to this.setupListeners
+        this.setupListeners.push(((id) => id === waitingId))
     }
 
     // sorry
