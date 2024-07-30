@@ -1,4 +1,4 @@
-import NewGame from "./NewGame"
+import NewGame from "./components/NewGame"
 
 export default function () {
     return (

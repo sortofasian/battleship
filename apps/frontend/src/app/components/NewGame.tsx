@@ -1,8 +1,8 @@
 import { UserResponseDto } from "@hs-intern/api"
 import { useContext, useRef, useState } from "react"
 
-import useApi from "../useApi"
-import { UserContext } from "../userContext"
+import useApi from "../../useApi"
+import { UserContext } from "../../userContext"
 
 function useDelay(f: (x: string) => void) {
     const timeout = useRef<number | undefined>(undefined)
