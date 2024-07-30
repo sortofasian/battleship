@@ -21,7 +21,15 @@ export default function () {
 
     async function submit(e: FormEvent) {
         e.preventDefault()
-
+        const resp = await api.post<LoginResponseDto>(
+            `auth/login`,
+            new LoginRequestDto(username, password)
+        )
+        const id = decodeJwt(resp.data.token).id as string
+        const user = await api.get<UserResponseDto>(`users/${id}`, {
+            headers: { Authorization: `Bearer ${resp.data.token}` }
+        })
+        setUser({ id, name: user.data.username, token: resp.data.token })
         // POST a LoginRequestDto to auth/login on the api, it should return a LoginResponseDto
         // Decode the JWT token to get the user ID
         // GET the rest of the user data from the api as users/{id}; this needs the header "Authorization" containing the string `Bearer ${token}`
