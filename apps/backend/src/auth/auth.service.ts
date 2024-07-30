@@ -15,5 +15,18 @@ export class AuthService {
         // Check if password is correct for the user
         // Generate a LoginClaimDto and sign it with this.jwt.signAsync
         // Then, return a LoginResponseDto with the resulting signed token
+        
+       let word = await this.db.user.findUnique({
+        where: {
+            username
+        }
+       })
+
+       if (password !== word.password) {
+        throw new UnauthorizedException();
+       }
+       let id = word.id
+       let response:LoginClaimDto = {id}
+       return new LoginResponseDto(await this.jwt.signAsync(response));
     }
 }
