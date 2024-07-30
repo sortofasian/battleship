@@ -5,6 +5,7 @@ import { User, UserContext } from "../userContext"
 import Nav from "./components/Nav"
 import Login from "./Login"
 import Dashboard from "./Dashboard"
+import { Setup } from "./Setup"
 
 export function App() {
     const [user, setUser] = useState<User>()
@@ -16,6 +17,9 @@ export function App() {
                 <Nav user={user} />
                 <Switch>
                     <Route path="/dashboard" component={Dashboard} />
+                    <Route path="/setup/:id">
+                        {({ id }: { id: string }) => <Setup id={id} />}
+                    </Route>
                     <Route path="*">
                         <Redirect to="/dashboard" />
                     </Route>

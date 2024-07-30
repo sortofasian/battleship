@@ -1,5 +1,6 @@
 import { UserResponseDto } from "@hs-intern/api"
 import { useContext, useRef, useState } from "react"
+import { useLocation } from "wouter"
 
 import useApi from "../../useApi"
 import { UserContext } from "../../userContext"
@@ -17,12 +18,20 @@ export default function NewGame() {
         UserResponseDto | undefined
     >()
     const [userList, setUsers] = useState<UserResponseDto[]>([])
+    const [, nav] = useLocation()
     const { user } = useContext(UserContext)
     const api = useApi(user?.token)
 
     const search = useDelay(async function (search) {
         // Search API for users, set userList to result
     })
+
+    async function newGame() {
+        if (!selectedUser) return
+
+        // Post a GameCreateDto to games/create; it should return a gameResponseDto
+        nav(`/setup/${game.id}`)
+    }
 
     return (
         <div className="p-6 m-auto w-80">
@@ -59,7 +68,10 @@ export default function NewGame() {
                                 >
                                     X
                                 </div>
-                                <div className="flex-grow bg-green-300 p-2">
+                                <div
+                                    className="flex-grow bg-green-300 p-2"
+                                    onClick={newGame}
+                                >
                                     Start?
                                 </div>
                             </div>
