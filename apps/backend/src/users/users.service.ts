@@ -13,5 +13,10 @@ export class UsersService {
 
     async read(id: string): Promise<User> {
         // Return one user by id
+        return this.db.user.findUnique({
+            where: {
+                id
+            }
+        })
     }
 }
