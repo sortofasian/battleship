@@ -1,9 +1,9 @@
-import { GameResponseDto, GameState } from "@hs-intern/api"
+import { GameActDto, GameResponseDto, GameState } from "@hs-intern/api"
 import { useContext, useEffect, useState } from "react"
 
 import useApi from "../useApi"
 import { UserContext } from "../userContext"
-import { Coordinate, Ship } from "@prisma/client"
+import { Action, Coordinate, Ship } from "@prisma/client"
 import { Board } from "./components/Board"
 
 enum CellState {
@@ -22,7 +22,9 @@ function coordToCell({ x, y }: Coordinate) {
 }
 
 function shipToCells(ship: Ship) {
-    const cells = new Array(ship.length).fill(coordToCell(ship.position))
+    const cells = new Array(ship.length).fill(
+        coordToCell(ship.position)
+    ) as number[]
     return cells.map((cell, i) => (ship.horizontal ? cell + i : cell + i * 10))
 }
 
@@ -47,9 +49,7 @@ export function Game({ id: gameId }: { id: string }) {
 
     // Initial useEffect to get data
     useEffect(() => {
-        ;(async () => {
-            // get the game state from api and setGame
-        })()
+        updateGame()
     }, [])
 
     // Updates state when game is updated
@@ -58,6 +58,10 @@ export function Game({ id: gameId }: { id: string }) {
             if (!game) return
 
             // If the gamestate is Defend, make a GET to games/${id}/act
+            if (game.state == GameState.Defend) {
+                await api.get(`games/${gameId}/act`)
+                updateGame()
+            }
 
             let userCells: CellState[] = new Array(100).fill(CellState.Empty)
             let enemyCells: CellState[] = new Array(100).fill(CellState.Empty)
@@ -65,23 +69,45 @@ export function Game({ id: gameId }: { id: string }) {
             // Update user cells with user ships
             // Reduce ships to a cell array
             // For every cell in every ship (recursion!), put the Ship cell state into the new cell array
-            userCells = // code...
+            game.ships.reduce((newCells, ship) => {
+                shipToCells(ship).forEach((cell) => {
+                    newCells[cell] = CellState.Ship
+                })
+                return newCells
+            }, userCells)
 
             // Update user cells with actions from enemy
             // Do this by reducing enemy game actions to a cell array
             // If the action hits, then set the cell state to Hit, if not then Miss
-            userCells = // code...
+            game.actionsEnemy.reduce((newCells, action) => {
+                const cell = coordToCell(action.target)
+                switch (newCells[cell]) {
+                    case CellState.Empty:
+                        newCells[cell] = CellState.Miss
+                    case CellState.Ship:
+                        newCells[cell] = CellState.Hit
+                    default:
+                        break
+                }
 
+                return newCells
+            }, userCells)
             // Do the same as above but with actionsUser and modify enemyCells
-            enemyCells = // code ...
-
-            setCells({
-                user: userCells,
-                enemy: enemyCells
-            })
+            game.actionsUser.reduce((newCells, action) => {
+                const cell = coordToCell(action.target)
+                switch (newCells[cell]) {
+                    case CellState.Empty:
+                        newCells[cell] = CellState.Miss
+                    case CellState.Ship:
+                        newCells[cell] = CellState.Hit
+                    default:
+                        break
+                }
+                return newCells
+            }, enemyCells)
+            setCells({ user: userCells, enemy: enemyCells })
         })()
     }, [game])
-
     function userCellStyle(cell: number) {
         switch (cells.user[cell]) {
             case CellState.Empty:
@@ -93,6 +119,12 @@ export function Game({ id: gameId }: { id: string }) {
             case CellState.Ship:
                 return "bg-gray-400"
         }
+    }
+
+    async function updateGame() {
+        // get the game state from api and setGame
+        const data = await api.get<GameResponseDto>(`games/${gameId}`)
+        setGame(data.data)
     }
 
     function enemyCellStyle(cell: number) {
@@ -113,6 +145,11 @@ export function Game({ id: gameId }: { id: string }) {
 
         // POST a GameActDto to games/${id}/act
         // You only get a cell number, not a Coordinate, so it needs conversion
+        await api.post<Action>(
+            `games/${game.id}/act`,
+            new GameActDto(cellToCoord(cell))
+        )
+        updateGame()
     }
 
     return (
