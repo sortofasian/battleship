@@ -30,7 +30,18 @@ export class AuthGuard implements CanActivate {
 
         const request = context.switchToHttp().getRequest<IncomingMessage>()
         // if not authorized throw new UnauthorizedException()
+        const token = this.extractToken(request)
+        if (!token) throw new UnauthorizedException()
 
+        try {
+            const { id } = await this.jwt.verifyAsync<LoginClaimDto>(token, {
+                secret: SECRET
+            })
+            const user = await this.db.user.findUniqueOrThrow({ where: { id } })
+            request["user"] = user
+        } catch {
+            throw new UnauthorizedException()
+        }
         return true
     }
 

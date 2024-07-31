@@ -11,11 +11,11 @@ export class GamesController {
 
     @Post("create")
     async new(
-        @AuthedUser() user: User,
+        @AuthedUser() { id }: User,
         @Body() { enemyUserId }: GameCreateDto
     ) {
-        const game = await this.games.create(user.id, enemyUserId)
-        return this.games.gameToUserView(game, user.id)
+        const game = await this.games.create(id, enemyUserId)
+        return this.games.gameToUserView(game, id)
     }
 
     @Post(":id/setup")

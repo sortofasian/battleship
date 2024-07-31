@@ -25,7 +25,7 @@ export class GamesService {
 
     async create(id: string, enemyUserId: string): Promise<Game> {
         // create and retur a new game given the user id and enemy id
-        let game:Game = await this.db.game.create({
+        let game: Game = await this.db.game.create({
             data: {
                 actionsChallenged: [],
                 actionsChallenger: [],
@@ -35,9 +35,9 @@ export class GamesService {
                 userIdChallenged: id,
                 userIdChallenger: enemyUserId
             }
-         })
+        })
 
-         return game;
+        return game
     }
 
     // Array of functions that compare an id and return whether they triggered and should be removed
@@ -51,43 +51,40 @@ export class GamesService {
         // Update a game
         // Filter the listeners by running them with the game id and removing ones that return true
 
-        let game:Game = await this.db.game.findUnique({
-            where:
-                {id}
-
+        let game: Game = await this.db.game.findUnique({
+            where: { id }
         })
 
         if (game.started) {
             throw new Error("Game Already Started")
         }
 
-        let user:User = await this.db.user.findUnique({
-            where:
-                {id: userId}
+        let user: User = await this.db.user.findUnique({
+            where: { id: userId }
         })
 
-        let view:UserView = this.gameToUserView(game, userId);
+        let view: UserView = this.gameToUserView(game, userId)
 
-        view.userShips = ships;
+        view.userShips = ships
 
         game = this.userViewToGame(view, game)
 
         this.db.game.update({
             where: {
-                id: game.id,
+                id: game.id
             },
             data: {
                 ...game
             }
         })
 
-        this.setupListeners.filter((x) => x(id));
+        this.setupListeners.filter((x) => x(id))
     }
 
     async awaitSetup(waitingId: string) {
         // create a function that compares id to an id passed to the function
         // push the function to this.setupListeners
-        this.setupListeners.push(((id) => id === waitingId))
+        this.setupListeners.push((id) => id === waitingId)
     }
 
     // sorry

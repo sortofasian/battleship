@@ -13,13 +13,17 @@ export class UsersController {
     ): Promise<UserResponseDto[]> {
         // Return list of users as DTO to client
         const users = await this.users.search(username)
-        return users.map((user) => new UserResponseDto(user.id, user.username))
+
+        return users.map((user) => {
+            return new UserResponseDto(user.id, user.username)
+        })
     }
 
     @Get(":id")
     async read(@Param("id") id: string): Promise<UserResponseDto> {
         // Return user as DTO to client
         const user = await this.users.read(id)
+
         return new UserResponseDto(user.id, user.username)
     }
 }

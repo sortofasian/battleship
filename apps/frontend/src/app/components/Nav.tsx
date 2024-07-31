@@ -9,8 +9,7 @@ function Nav({ user }: { user: User }) {
 
     function logout() {
         setUserCtx(undefined)
-        // clear the userContext on logout
-        nav("/")
+        nav("/login")
     }
 
     return (
