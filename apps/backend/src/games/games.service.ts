@@ -84,29 +84,79 @@ export class GamesService {
     async awaitSetup(waitingId: string) {
         // create a function that compares id to an id passed to the function
         // push the function to this.setupListeners
-        this.setupListeners.push((id) => id === waitingId)
+        await new Promise<void>((res) => {
+            this.setupListeners.push((id) => {
+                if(id !== waitingId) return false
+                res()
+                return true
+            })
+        })
     }
 
     private actionListeners: ((gameId: string) => boolean)[] = []
 
-    async waitForAction(id: string) {}
+    async awaitAction(waitingId: string) {
+        await new Promise<void>((res) => {
+            this.actionListeners.push((id) => {
+                if(id !== waitingId) return false
+                res()
+                return true
+            })
+        })
+    }
 
-    async act(id: string, userId: string, target: Coordinate) {
+    async act(id: string, userId: string, target: Coordinate): Promise<Action> {
         const game = await this.db.game.findUniqueOrThrow({ where: { id } })
         const userView = this.gameToUserView(game, userId)
+
+        const enemyShipCoords = userView.enemyShips.map(shipToCoords).flat()
 
         // check whether action hit a ship, for every ship in enemy ships
         // add action to useractions
 
+        for (let i = 0; i < enemyShipCoords.length; i++){
+            const hit = target.x === enemyShipCoords[i].x && target.y === enemyShipCoords[i].y
+        
+            userView.userActions.push({
+                hit,
+                target
+            })
+        }
+        
         // check whether every enemy ship was hit by user actions
         // If true, set the winnerId to the user
+        let allHit = false;
+        for (let i = 0; i < enemyShipCoords.length; i++){
+            const enemyship = enemyShipCoords[i];
+            let shipHit = false;
+            for(let j = 0; j < userView.userActions.length; j++){
+                const userAction = userView.userActions[j]
+                if(userAction.hit && userAction.target.x == enemyship.x && userAction.target.y == enemyship.y){
+                    shipHit = true;
+                }
+            }
+            if(!shipHit){
+                allHit = false;
+                break;
+            }
+            else allHit = true;
+        }
+
+        if(allHit){
+            userView.winnerId = userId;
+        }
 
         // convert userview back to db game
+        const newGame = this.userViewToGame(userView, game)
         // update database
+        this.db.game.update({where: {id: game.id}, data: newGame})
 
         // run action handlers
 
+        this.actionListeners.filter((listener) => !listener(id))
+
         // return action
+        return {hit: allHit, target}
     }
 
     // sorry
