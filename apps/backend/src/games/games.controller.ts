@@ -1,4 +1,4 @@
-import { GameCreateDto, GameSetupDto } from "@hs-intern/api"
+import { GameActDto, GameCreateDto, GameSetupDto } from "@hs-intern/api"
 import { Body, Controller, Get, Param, Post } from "@nestjs/common"
 import { User } from "@prisma/client"
 
@@ -30,5 +30,14 @@ export class GamesController {
     @Get(":id/setup")
     async awaitSetup(@Param("id") id: string) {
         await this.games.awaitSetup(id)
+    }
+
+    @Post(":id/act")
+    async actPost(
+        @AuthedUser() { id: userId }: User,
+        @Param("id") id: string,
+        @Body() { target }: GameActDto
+    ) {
+        await this.games.act(id, userId, target)
     }
 }

@@ -1,6 +1,6 @@
 import { GameState } from "@hs-intern/api"
 import { Injectable } from "@nestjs/common"
-import { Action, Game, Ship, User } from "@prisma/client"
+import { Action, Coordinate, Game, Ship, User } from "@prisma/client"
 
 import { DbService } from "../db/db.service"
 
@@ -25,7 +25,7 @@ export class GamesService {
 
     async create(id: string, enemyUserId: string): Promise<Game> {
         // create and retur a new game given the user id and enemy id
-        let game: Game = await this.db.game.create({
+        const game: Game = await this.db.game.create({
             data: {
                 actionsChallenged: [],
                 actionsChallenger: [],
@@ -59,11 +59,11 @@ export class GamesService {
             throw new Error("Game Already Started")
         }
 
-        let user: User = await this.db.user.findUnique({
+        const user: User = await this.db.user.findUnique({
             where: { id: userId }
         })
 
-        let view: UserView = this.gameToUserView(game, userId)
+        const view: UserView = this.gameToUserView(game, userId)
 
         view.userShips = ships
 
@@ -85,6 +85,28 @@ export class GamesService {
         // create a function that compares id to an id passed to the function
         // push the function to this.setupListeners
         this.setupListeners.push((id) => id === waitingId)
+    }
+
+    private actionListeners: ((gameId: string) => boolean)[] = []
+
+    async waitForAction(id: string) {}
+
+    async act(id: string, userId: string, target: Coordinate) {
+        const game = await this.db.game.findUniqueOrThrow({ where: { id } })
+        const userView = this.gameToUserView(game, userId)
+
+        // check whether action hit a ship, for every ship in enemy ships
+        // add action to useractions
+
+        // check whether every enemy ship was hit by user actions
+        // If true, set the winnerId to the user
+
+        // convert userview back to db game
+        // update database
+
+        // run action handlers
+
+        // return action
     }
 
     // sorry
@@ -168,4 +190,13 @@ export class GamesService {
 
         return result
     }
+}
+
+function shipToCoords(ship: Ship) {
+    const coords: Coordinate[] = new Array(ship.length).fill(ship.position)
+    const x = coords.map((pos, i) =>
+        ship.horizontal ? { ...pos, x: pos.x + i } : { ...pos, y: pos.y + i }
+    )
+
+    return x
 }
