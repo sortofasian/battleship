@@ -9,6 +9,8 @@ export class UsersService {
 
     async search(query: string): Promise<User[]> {
         // Return a list of users by partial username
+        const users = this.db.user.findMany({where: {username: {startsWith: query}}})
+        return users    
     }
 
     async read(id: string): Promise<User> {

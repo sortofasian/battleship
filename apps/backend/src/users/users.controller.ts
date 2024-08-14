@@ -12,8 +12,6 @@ export class UsersController {
         // Return user as DTO to client
         const user = await this.users.read(id)
         return new UserResponseDto(user.id,user.username)
-
-        ) 
     }
 
     @Get("search")
@@ -22,5 +20,11 @@ export class UsersController {
     ): Promise<UserResponseDto[]> {
         // Return list of users as DTO to client
         const users = await this.users.search(username)
-    }
+        const dtos = []
+        for(let i = 0; i < users.length; i++) {
+            const user = users[i]
+            dtos.push(new UserResponseDto(user.id, user.username))
+        }
+        return dtos
+    }     
 }
