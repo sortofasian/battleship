@@ -13,7 +13,16 @@ export class AuthService {
 
     async login(username: string, password: string) {
         // Check if password is correct for the user
-        // Generate a LoginClaimDto and sign it with this.jwt.signAsync
-        // Then, return a LoginResponseDto with the resulting signed token
+       const User = await this.db.user.findUnique(
+            {
+                where:{ username: username}
+            }
+        )
+            if (User.password == password) {
+                const Dto: LoginClaimDto = {id: User.id}
+               const token = await this.jwt.signAsync(Dto)
+                const Res = new LoginResponseDto(token)
+                return Res
+            }
     }
 }
