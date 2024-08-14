@@ -45,7 +45,8 @@ export function Setup({ id }: { id: string }) {
     useEffect(() => {
         const newCells = ships.reduce((update, ship) => {
             // for every cell in every ship, set the corresponding cell of update to true
-
+            shipToCells(ship).forEach((cell) => cell.update = true)
+            
             return update
         }, Array(100).fill(false))
 
