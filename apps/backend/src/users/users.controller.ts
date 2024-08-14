@@ -11,6 +11,9 @@ export class UsersController {
     async read(@Param("id") id: string): Promise<UserResponseDto> {
         // Return user as DTO to client
         const user = await this.users.read(id)
+        return new UserResponseDto(user.id,user.username)
+
+        ) 
     }
 
     @Get("search")

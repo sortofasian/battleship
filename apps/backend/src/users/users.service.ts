@@ -12,6 +12,7 @@ export class UsersService {
     }
 
     async read(id: string): Promise<User> {
-        // Return one user by id
+        const data = await this.db.user.findUnique({where: {id: id}})
+        return data
     }
 }
