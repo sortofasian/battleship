@@ -35,6 +35,8 @@ export function Setup({ id }: { id: string }) {
         try {
             // Post GameSetupDto to `games/${id}/setup
             // Get games/${id}/setup to wait for the opponent to set up their board
+            const postResponse = await api.post<GameSetupDto>(`games/${user?.id}/setup`, new GameSetupDto(ships))
+            const getResponse = await api.get(`games/${user?.id}/setup`)
             nav(`/game/${id}`)
         } catch (e) {
             setPending(false)
@@ -72,10 +74,25 @@ export function Setup({ id }: { id: string }) {
                 active={!pending}
                 onSelect={(cell) => {
                     // If 5 ships are placed, or if ships are out of bounds, do not proceed to set ships
-                    setShips([
-                        ...ships,
-                        { horizontal, length: 5, position: cellToCoord(cell) }
-                    ])
+                    if (ships.length < 5) {
+                        ships.every((ship) => {
+                            if(ship.horizontal) {
+                                const cells = shipToCells(ship)
+                                return cells.every((cell) => cellToCoord(cell).x === ship.position.x) && ship.position.x <= 10
+                            }
+                        })
+
+                        ships.every((ship) => {
+                            const cells = shipToCells(ship)
+                            return cells.every((cell) => cellToCoord(cell).y === ship.position.y) && ship.position.y <=10
+                        })
+
+                        setShips([
+                            ...ships,
+                            { horizontal, length: 5, position: cellToCoord(cell) }
+                        ])
+                    }
+                    
                 }}
                 styleCell={(cell) => {
                     switch (cells[cell]) {
