@@ -39,12 +39,18 @@ export default function () {
                 className={style.textInput}
                 // the value should equal the username variable
                 // set the username on input
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                
+                
             />
             <input
                 type="password"
                 placeholder="Password"
                 className={style.textInput}
                 // Same deal as the username field
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
             />
             <input type="submit" value="Submit" className={style.submit} />
         </form>
