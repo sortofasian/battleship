@@ -9,7 +9,7 @@ import { FormEvent, useContext, useState } from "react"
 import { useLocation } from "wouter"
 
 import useApi from "../useApi"
-import { UserContext } from "../userContext"
+import { User, UserContext } from "../userContext"
 
 export default function () {
     const [username, setUsername] = useState("")
@@ -26,7 +26,13 @@ export default function () {
         // Decode the JWT token to get the user ID
         // GET the rest of the user data from the api as users/{id}; this needs the header "Authorization" containing the string `Bearer ${token}`
         // Finally, set the userContext to the new user data
+        
+        const postResponse = await api.post<LoginResponseDto>("auth/login", new LoginRequestDto(username, password))
+        const returnUser = decodeJwt(postResponse.data.token)
 
+        const getResponse = await api.get<UserResponseDto>(`users/${returnUser}`)
+        const newUser: User = {id: getResponse.data.id, name: postResponse.data.token, token: postResponse.data.token}
+        setUser(newUser)
         nav("/dashboard")
     }
 
